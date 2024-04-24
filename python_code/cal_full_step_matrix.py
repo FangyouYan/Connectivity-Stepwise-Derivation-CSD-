@@ -2,10 +2,12 @@
 # @date: 2024/4/9 pm：3:19
 import numpy as np
 from numpy import mat
+from rdkit import Chem
+
 
 class Algorithm_MS:
     @staticmethod
-    def floyd(M_S_A):
+    def FullStepMatrixbyFloydWarshall(M_S_A):
         """
         Floyd-Warshall algorithm
         :param M_S_A: adjacency matrix
@@ -29,7 +31,7 @@ class Algorithm_MS:
         return dis
 
     @staticmethod
-    def FastFullStepMatrix(n_atom:int, Sa:[[int]], Ladj:[[int]]):
+    def FullStepMatrixbyCSD(n_atom:int, Sa:[[int]], Ladj:[[int]]):
         """
         CSD algorithm
         :param n_atom: number of atoms
@@ -98,7 +100,7 @@ class StructureInformation:
         si, n_atom, n_adj, n_atom_start = CommonUtils.fastStrFromMol(ISI)
         Sa = CommonUtils.FastStepBondFromMol(n_atom, n_atom_start, n_adj, ISI)
         Ladj = CommonUtils.FastAdjacentLists(n_atom, Sa)
-        SF = Algorithm_MS.FastFullStepMatrix(n_atom, Sa, Ladj)
+        SF = Algorithm_MS.FullStepMatrixbyCSD(n_atom, Sa, Ladj)
         SI = {'n_atom': n_atom, 'SF': SF}
         return SI
 
@@ -106,7 +108,7 @@ class StructureInformation:
     def fast_floyd_mol(ISI):
         si, n_atom, n_adj, n_atom_start = CommonUtils.fastStrFromMol(ISI)
         Sa = CommonUtils.FastStepBondFromMol(n_atom, n_atom_start, n_adj, ISI)
-        SF = Algorithm_MS.floyd(Sa) # Plus routing matrix
+        SF = Algorithm_MS.FullStepMatrixbyFloydWarshall(Sa)  # Plus routing matrix
         # SI = {'n_atom': n_atom, 'SF': SF[0]}
         SI = {'n_atom': n_atom, 'SF': SF}
         return SI
@@ -120,3 +122,8 @@ if __name__ == '__main__':
         print(SF_CSD['SF'])
         print(SF_floyd['SF'])
 
+    with open('./data/ben.mol', 'r') as f:
+        content=f.read()
+        mol = Chem.MolFromMolBlock(content, removeHs=False)  # removeHs是控制去除H原子
+        SF_RDKit = Chem.GetDistanceMatrix(mol)
+        print(SF_RDKit)
