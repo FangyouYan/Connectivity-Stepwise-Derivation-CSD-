@@ -19,18 +19,18 @@ using namespace std;
 // define the matrix
 using Matrix = std::vector<std::vector<float>>;
 
-std::tuple<std::vector<std::string>, int, int, int> betterFastStrFromMol(const std::vector<std::string> &ISI);
+std::tuple<int, int, int> betterFastStrFromMol(const std::vector<std::string> &ISI);
 
 std::tuple<Matrix>
 FastStepBondFromMol(int n_atom, int n_atom_start, int n_adj, const std::vector<std::string> &ISI);
 
 // generate the MSA faster
-std::tuple<std::vector<std::vector<int>>>
+std::tuple<std::vector<std::vector<int>>,std::vector<int>,std::vector<int>>
 FastAdjacentLists(int n_atom, std::vector<std::vector<float>> Sa);
 
 //  FullStepMatrix implements
 std::vector<std::vector<float>>
-FastFullStepMatrix(int n_atom, std::vector<std::vector<float>> &Sa, std::vector<std::vector<int>> &Ladj);
+FastFullStepMatrix(int n_atom, std::vector<std::vector<float>> &Sa, std::vector<std::vector<int>> &Ladj,std::vector<int> w_ms_r,std::vector<int> w_ms_c);
 
 vector<vector<float>> floyd(vector<vector<float>> MSa);
 
