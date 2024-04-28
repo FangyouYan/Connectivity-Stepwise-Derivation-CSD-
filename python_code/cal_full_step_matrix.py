@@ -97,8 +97,8 @@ class CommonUtils:
             Sa[i_s, i_g] = 1
             Sa[i_g, i_s] = 1
             # get Ladj
-            Ladj.setdefault(i_s+1, []).append(i_g + 1)
-            Ladj.setdefault(i_g+1, []).append(i_s + 1)
+            Ladj.setdefault(i_s+1, set()).add(i_g + 1)
+            Ladj.setdefault(i_g+1, set()).add(i_s + 1)
         return Sa, Ladj
 
     @staticmethod
