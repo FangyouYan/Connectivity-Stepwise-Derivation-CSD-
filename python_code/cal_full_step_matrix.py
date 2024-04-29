@@ -1,6 +1,6 @@
 # @author: code_king
 # @date: 2024/4/9 pm：3:19
-from typing import Dict, List
+from typing import Dict, List, Set, Tuple
 
 import numpy as np
 from numpy import mat
@@ -33,7 +33,7 @@ class Algorithm_MS:
         return dis
 
     @staticmethod
-    def FullStepMatrixbyCSD(n_atom: int, Sa: [[int]], Ladj: Dict[int, List[int]]):
+    def FullStepMatrixbyCSD(n_atom: int, Sa: [[int]], Ladj: Dict[int, List[int]], step_xy: Set[Tuple[int, int]]):
         """
         CSD algorithm
         :param n_atom: number of atoms
@@ -42,25 +42,17 @@ class Algorithm_MS:
         :return: MSF
         """
         SF = Sa
-        w_ms = np.where(SF == 1)
-        w_ms_r = w_ms[0]
-        w_ms_c = w_ms[1]
         for m in range(1, n_atom - 1):
-            if len(w_ms_r) == 0:
-                break
-            w_ms_r_ = []
-            w_ms_c_ = []
-            # w_ms_r is constant level, looking for atoms with step size n, up to n-1
-            for k, i in enumerate(w_ms_r):
-                w_msi = Ladj[w_ms_c[k]+1]
-                # w_msi Adjacent atom. It's a constant, maximum n-1
-                for j in w_msi:
-                    if SF[i, j - 1] == 0 and i != j - 1:
-                        SF[i, j - 1] = m + 1
-                        w_ms_r_.append(i)
-                        w_ms_c_.append(j - 1)
-            w_ms_r = w_ms_r_
-            w_ms_c = w_ms_c_
+            if len(step_xy) == 0: break
+            temp_step_xy =[]
+            for item in step_xy:
+                r = item[0]
+                wsi = Ladj[item[1]]
+                for c in wsi:
+                    if SF[r - 1, c - 1] == 0 and r != c:
+                        SF[r - 1, c - 1] = m + 1
+                        temp_step_xy.append((r, c))
+            step_xy = temp_step_xy
         return SF
 
 
@@ -91,15 +83,20 @@ class CommonUtils:
         Sa = mat(np.zeros((n_atom, n_atom)))
         Ladj = {}
         # get adjacency matrix and atom connectivity
+        # define wsc ,wsr
+        step_xy = []
         for j in range(n_atom_start + n_atom, n_atom_start + n_atom + n_adj):
-            i_s = min([int(ISI[j][0:3]) - 1, int(ISI[j][3:6]) - 1])
-            i_g = max([int(ISI[j][0:3]) - 1, int(ISI[j][3:6]) - 1])
+            i_s = int(ISI[j][0:3]) - 1
+            i_g = int(ISI[j][3:6]) - 1
             Sa[i_s, i_g] = 1
             Sa[i_g, i_s] = 1
             # get Ladj
-            Ladj.setdefault(i_s+1, set()).add(i_g + 1)
-            Ladj.setdefault(i_g+1, set()).add(i_s + 1)
-        return Sa, Ladj
+            Ladj.setdefault(i_s + 1, set()).add(i_g + 1)
+            Ladj.setdefault(i_g + 1, set()).add(i_s + 1)
+            # wsc,wsr
+            step_xy.append((i_s + 1, i_g + 1))
+            step_xy.append((i_g + 1, i_s + 1))
+        return Sa, Ladj, step_xy
 
     @staticmethod
     def FastAdjacentLists(n_atom: int, Sa: [[int]]):
@@ -114,9 +111,9 @@ class StructureInformation:
     @staticmethod
     def fast_mol(ISI):
         si, n_atom, n_adj, n_atom_start = CommonUtils.fastStrFromMol(ISI)
-        Sa, Ladj = CommonUtils.getMSaAndLadj(n_atom, n_atom_start, n_adj, ISI)
+        Sa, Ladj, step_xy = CommonUtils.getMSaAndLadj(n_atom, n_atom_start, n_adj, ISI)
         # Ladj = CommonUtils.FastAdjacentLists(n_atom, Sa)
-        SF = Algorithm_MS.FullStepMatrixbyCSD(n_atom, Sa, Ladj)
+        SF = Algorithm_MS.FullStepMatrixbyCSD(n_atom, Sa, Ladj, step_xy)
         SI = {'n_atom': n_atom, 'SF': SF}
         return SI
 
