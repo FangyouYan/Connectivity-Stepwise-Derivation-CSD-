@@ -44,11 +44,10 @@ class Algorithm_MS:
         SF = Sa
         for m in range(1, n_atom - 1):
             if len(step_xy) == 0: break
-            temp_step_xy =[]
+            temp_step_xy = []
             for item in step_xy:
                 r = item[0]
-                wsi = Ladj[item[1]]
-                for c in wsi:
+                for c in Ladj[item[1]]:
                     if SF[r - 1, c - 1] == 0 and r != c:
                         SF[r - 1, c - 1] = m + 1
                         temp_step_xy.append((r, c))
@@ -84,7 +83,7 @@ class CommonUtils:
         Ladj = {}
         # get adjacency matrix and atom connectivity
         # define wsc ,wsr
-        step_xy = []
+        step_xy = set()
         for j in range(n_atom_start + n_atom, n_atom_start + n_atom + n_adj):
             i_s = int(ISI[j][0:3]) - 1
             i_g = int(ISI[j][3:6]) - 1
@@ -94,8 +93,8 @@ class CommonUtils:
             Ladj.setdefault(i_s + 1, set()).add(i_g + 1)
             Ladj.setdefault(i_g + 1, set()).add(i_s + 1)
             # wsc,wsr
-            step_xy.append((i_s + 1, i_g + 1))
-            step_xy.append((i_g + 1, i_s + 1))
+            step_xy.add((i_s + 1, i_g + 1))
+            step_xy.add((i_g + 1, i_s + 1))
         return Sa, Ladj, step_xy
 
     @staticmethod
