@@ -3,7 +3,7 @@ project(FullStepMatrixCode)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# 将公用的打包为一个
+# Pack the common ones into one
 add_library(msutils
         common_utils/MsUtils.h
         common_utils/MsUtils.cpp
